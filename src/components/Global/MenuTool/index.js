@@ -69,7 +69,7 @@ function MenuTool() {
                     <div className={cx('content')}>
                         <div className="grid grid-cols-2">
                             <div>
-                                <h3 className={cx('heading-1')}>Thông tin cơ bản</h3>
+                                <h3 className={cx('heading-1')}>Thông tin sản phẩm</h3>
                                 <div className={cx('item')}>
                                     <h2 className={cx('heading-2')}>
                                         Thể loại <span className="text-red-600">*</span>
