@@ -1,8 +1,6 @@
 import styles from './UserNav.module.scss';
 import classNames from 'classnames/bind';
-import { UserOutlined } from '@ant-design/icons';
-import { Avatar, Space } from 'antd';
-import { Button, Drawer } from 'antd';
+import { Drawer } from 'antd';
 import { useState } from 'react';
 import UserHead from '../UserHead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -19,9 +17,6 @@ const cx = classNames.bind(styles);
 
 function UserNav() {
     const [open, setOpen] = useState(false);
-    const showDrawer = () => {
-        setOpen(true);
-    };
     const onClose = () => {
         setOpen(false);
     };
