@@ -10,15 +10,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLocationDot, faHeart as faHeartSolid, faEye } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
 import { Modal, Tooltip, Image } from 'antd';
+import { Link } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 function CardNews() {
     const [isHeart, setIsHeart] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const showModal = () => {
+    const showModal = (e) => {
+        e.stopPropagation();
         setIsModalOpen(true);
     };
+
     return (
         <div className={cx('wrap')}>
             <img src={img} alt="" />
@@ -31,7 +34,7 @@ function CardNews() {
             </div>
             <div className={cx('list-icon')}>
                 <Tooltip placement="top" title={'Quick view'}>
-                    <FontAwesomeIcon className={cx('icon')} icon={faEye} onClick={() => showModal()} />
+                    <FontAwesomeIcon className={cx('icon')} icon={faEye} onClick={(e) => showModal(e)} />
                 </Tooltip>
             </div>
             <div className={cx('content')}>

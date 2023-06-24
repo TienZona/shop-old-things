@@ -7,6 +7,7 @@ import Register from '~/pages/auth/register';
 import NewsPage from '~/pages/news';
 import UserPage from '~/pages/user';
 import DetailPage from '~/pages/detail';
+import Detailproduct from '~/pages/detailproduct/Detailproduct';
 
 const publicRoutes = [
     {
@@ -30,8 +31,8 @@ const publicRoutes = [
         layout: null,
     },
     {
-        path: '/details/:id',
-        component: DetailPage,
+        path: '/detail/:id',
+        component: Detailproduct,
         layout: HomeLayout,
     },
     {
