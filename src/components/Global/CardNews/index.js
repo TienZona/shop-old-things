@@ -1,16 +1,17 @@
 import classNames from 'classnames/bind';
 import styles from './CardNews.module.scss';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { NumberVND } from '~/functions';
 import img from '~/assets/images/iphone-14.jpg';
 import chatIcon from '~/assets/icon/messenger.png';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLocationDot, faHeart as faHeartSolid, faEye } from '@fortawesome/free-solid-svg-icons';
+import { faLocationDot, faHeart as faHeartSolid, faEye, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
 import { Modal, Tooltip, Image } from 'antd';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const cx = classNames.bind(styles);
 
@@ -21,6 +22,15 @@ function CardNews() {
         e.stopPropagation();
         setIsModalOpen(true);
     };
+
+    // useEffect(() => {
+    //     axios
+    //         .get(`https://provinces.open-api.vn/api/p/`)
+    //         .then((res) => {
+    //             console.log(res);
+    //         })
+    //         .catch((err) => console.log(err));
+    // }, []);
 
     return (
         <div className={cx('wrap')}>
@@ -33,8 +43,14 @@ function CardNews() {
                 )}
             </div>
             <div className={cx('list-icon')}>
-                <Tooltip placement="top" title={'Quick view'}>
+                <Tooltip placement="top" title={'Xem nhanh'}>
                     <FontAwesomeIcon className={cx('icon')} icon={faEye} onClick={(e) => showModal(e)} />
+                </Tooltip>
+
+                <Tooltip placement="top" title={'Xem sản phẩm'}>
+                    <Link to={'/detail/123'}>
+                        <FontAwesomeIcon className={cx('icon')} icon={faCircleInfo} />
+                    </Link>
                 </Tooltip>
             </div>
             <div className={cx('content')}>
@@ -74,10 +90,17 @@ function CardNews() {
                                 <p>
                                     <b>SĐT: </b> 09787873434
                                 </p>
-                                <div className="flex justify-center p-6 mt-5">
-                                    <button className={cx('send')}>
-                                        Nhắn tin <img className="mx-3" width={24} src={chatIcon} alt="" />
-                                    </button>
+                                <div className="flex">
+                                    <div className="flex justify-center p-6 mt-5">
+                                        <button className={cx('send')}>
+                                            Nhắn tin <img className="mx-3" width={24} src={chatIcon} alt="" />
+                                        </button>
+                                    </div>
+                                    <Link to={'/detail/123'}>
+                                        <div className="flex justify-center p-6 mt-5">
+                                            <button className={cx('send')}>Xem sản phẩm</button>
+                                        </div>
+                                    </Link>
                                 </div>
                             </div>
                         </div>

@@ -2,11 +2,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styles from './MenuTool.module.scss';
 import classNames from 'classnames/bind';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { Modal, Select, ColorPicker, Input, InputNumber } from 'antd';
 import UploadImage from '../UploadImage';
 import { PhoneOutlined } from '@ant-design/icons';
+import axios from 'axios';
 const cx = classNames.bind(styles);
 
 function MenuTool() {
@@ -14,6 +15,8 @@ function MenuTool() {
     const [colorHex, setColorHex] = useState('#1677ff');
     const [formatHex, setFormatHex] = useState('hex');
     const [open, setOpen] = useState(false);
+    const [listProvince, setListProvince] = useState([]);
+    const [listDistrict, setListDistricts] = useState([]);
     const { TextArea } = Input;
     const onChange = (e) => {
         console.log('Change:', e.target.value);
@@ -36,6 +39,42 @@ function MenuTool() {
             label: 'Đồng hồ thông minh',
         },
     ];
+
+    useEffect(() => {
+        axios
+            .get(`https://provinces.open-api.vn/api/p/`)
+            .then((res) => {
+                let newList = res.data.map((item) => {
+                    return {
+                        value: item.code,
+                        label: item.name,
+                    };
+                });
+                setListProvince(newList);
+            })
+            .catch((err) => console.log(err));
+    }, []);
+
+    const getDistricts = (code) => {
+        axios
+            .get(`https://provinces.open-api.vn/api/p/${code}?depth=2`)
+            .then((res) => {
+                setListDistricts(
+                    res.data.districts.map((districts) => {
+                        return {
+                            value: districts.code,
+                            label: districts.name,
+                        };
+                    }),
+                );
+            })
+            .catch((err) => console.log(err));
+    };
+
+    useEffect(() => {
+        console.log(listDistrict);
+    }, [listDistrict]);
+
     const closeModal = () => {
         setIconA(false);
         setOpen(false);
@@ -123,11 +162,46 @@ function MenuTool() {
                                     <h2 className={cx('heading-2')}>
                                         Địa chỉ <span className="text-red-600">*</span>
                                     </h2>
-                                    <Input
-                                        type="tel"
-                                        style={{ width: '300px' }}
-                                        placeholder="..."
-                                        prefix={<PhoneOutlined />}
+
+                                    <Select
+                                        showSearch
+                                        style={{
+                                            width: 300,
+                                        }}
+                                        placeholder="Tỉnh"
+                                        optionFilterProp="children"
+                                        filterOption={(input, option) => (option?.label ?? '').includes(input)}
+                                        filterSort={(optionA, optionB) =>
+                                            (optionA?.label ?? '    ')
+                                                .toLowerCase()
+                                                .localeCompare((optionB?.label ?? '').toLowerCase())
+                                        }
+                                        onSelect={(value) => {
+                                            setListDistricts([]);
+                                            getDistricts(value);
+                                        }}
+                                        options={listProvince}
+                                    />
+                                </div>
+                                <div className={cx('item')}>
+                                    <h2 className={cx('heading-2')}>
+                                        {/* Địa chỉ - Tỉnh <span className="text-red-600">*</span> */}
+                                    </h2>
+                                    <Select
+                                        showSearch
+                                        style={{
+                                            width: 300,
+                                        }}
+                                        placeholder="Huyện/Quận"
+                                        optionFilterProp="children"
+                                        filterOption={(input, option) => (option?.label ?? '').includes(input)}
+                                        filterSort={(optionA, optionB) =>
+                                            (optionA?.label ?? '    ')
+                                                .toLowerCase()
+                                                .localeCompare((optionB?.label ?? '').toLowerCase())
+                                        }
+                                        onSelect={(value) => getDistricts(value)}
+                                        options={listDistrict}
                                     />
                                 </div>
                             </div>

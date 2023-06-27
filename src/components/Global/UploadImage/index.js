@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind';
 import styles from './UploadImage.module.scss';
-
+import { Cloudinary } from '@cloudinary/url-gen';
 import { PlusOutlined } from '@ant-design/icons';
 import { Modal, Upload } from 'antd';
 import { useState } from 'react';
@@ -19,6 +19,8 @@ function UploadImage() {
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
     const [fileList, setFileList] = useState([]);
+    const cld = new Cloudinary({ cloud: { cloudName: 'drtmlglka' } });
+
     const handleCancel = () => setPreviewOpen(false);
     const handlePreview = async (file) => {
         if (!file.url && !file.preview) {
@@ -41,6 +43,7 @@ function UploadImage() {
             </div>
         </div>
     );
+    console.log(process.env.REACT_APP_CLOUDINARY_KEY);
     return (
         <div className={cx('wrap')}>
             <Upload

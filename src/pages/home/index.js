@@ -52,6 +52,21 @@ function Home() {
                                 <div className={cx('item')}>
                                     <CardNews />
                                 </div>
+                                <div className={cx('item')}>
+                                    <CardNews />
+                                </div>
+                                <div className={cx('item')}>
+                                    <CardNews />
+                                </div>
+                                <div className={cx('item')}>
+                                    <CardNews />
+                                </div>
+                                <div className={cx('item')}>
+                                    <CardNews />
+                                </div>
+                                <div className={cx('item')}>
+                                    <CardNews />
+                                </div>
                             </div>
                         </div>
                     </div>

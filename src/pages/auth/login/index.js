@@ -1,51 +1,108 @@
 import classNames from 'classnames/bind';
 import styles from './Login.module.scss';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import googleIcon from '~/assets/icon/google.png';
 import facebookIcon from '~/assets/icon/facebook.png';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
+
+import { message } from 'antd';
+
+import axios from 'axios';
 
 const cx = classNames.bind(styles);
 
 function Login() {
+    const navigate = useNavigate();
+    const [cookies, setCookie] = useCookies(['access_token', 'refresh_token']);
     const [isPassword, setIsPw] = useState(false);
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const emailRef = useRef(null);
+    const usernameRef = useRef(null);
     const passwordRef = useRef(null);
-    const logEmailReg = useRef(null);
+    const logUsernameReg = useRef(null);
+    const logPassowrdReg = useRef(null);
 
     const validator = () => {
-        if (!validateEmail(email)) {
-            emailRef.current.focus();
-            logEmailReg.current.style.display = 'inline';
+        if (!username) {
+            usernameRef.current.focus();
+            logUsernameReg.current.style.display = 'inline';
             return false;
         } else {
-            logEmailReg.current.style.display = 'none';
+            logUsernameReg.current.style.display = 'none';
         }
 
         if (password === '') {
             passwordRef.current.focus();
+            logPassowrdReg.current.style.display = 'inline';
+            passwordRef.current.innerHTML = 'Please enter a password';
             return false;
+        } else {
+            logPassowrdReg.current.style.display = 'none';
+        }
+
+        if (password.length < 6) {
+            passwordRef.current.focus();
+            logPassowrdReg.current.style.display = 'inline';
+            logPassowrdReg.current.innerHTML = 'Password is shorter than 6 characters';
+            return false;
+        } else {
+            logPassowrdReg.current.style.display = 'none';
         }
 
         return true;
     };
 
-    const validateEmail = (email) => {
-        return email.match(
-            /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-        );
-    };
-
     const submitLogin = () => {
         if (validator()) {
-            setEmail('');
+            setUsername('');
             setPassword('');
-            alert('Success');
+            login();
         }
+    };
+
+    const login = () => {
+        const formData = {
+            username: username,
+            password: password,
+        };
+        axios
+            .post('https://localhost:44352/api/Auth/login', JSON.stringify(formData), {
+                headers: {
+                    'content-type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                },
+            })
+            .then((res) => {
+                if (res.status === 200) {
+                    message.success('Successful Login');
+
+                    let expires = new Date();
+                    expires.setTime(expires.getTime() + res.data.expireDate * 1000);
+                    setCookie('access_token', res.data.token, { path: '/', expires });
+                    getProfile(res.data.token);
+                    console.log(res.data.token);
+                    // setTimeout(() => {
+                    //     navigate('/home');
+                    // }, 2000);
+                }
+            })
+            .catch((err) => message.error(err.response.data.message));
+    };
+
+    const getProfile = (token) => {
+        axios
+            .get('https://localhost:44352/api/User/getMyProfile', {
+                headers: {
+                    Authorization: `Basic ${token}`,
+                    'Access-Control-Allow-Origin': '*',
+                },
+            })
+            .then((res) => console.log(res))
+            .catch((err) => console.log(err));
     };
 
     return (
@@ -55,14 +112,15 @@ function Login() {
                 <div className={cx('group')}>
                     <div className={cx('item')}>
                         <input
-                            ref={emailRef}
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            type="email"
-                            placeholder="Enter your email"
+                            ref={usernameRef}
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            type="text"
+                            placeholder="Enter your username"
+                            onKeyDown={(e) => e.key === 'Enter' && submitLogin()}
                         />
-                        <span ref={logEmailReg} className={cx('item-log')} style={{ display: 'none' }}>
-                            Please enter a valid email address
+                        <span ref={logUsernameReg} className={cx('item-log')} style={{ display: 'none' }}>
+                            Please enter your username
                         </span>
                     </div>
                     <div className={cx('item', 'password')}>
@@ -72,6 +130,7 @@ function Login() {
                             onChange={(e) => setPassword(e.target.value)}
                             type={isPassword ? 'text' : 'password'}
                             placeholder="Password"
+                            onKeyDown={(e) => e.key === 'Enter' && submitLogin()}
                         />
                         <div className={cx('icon')}>
                             {isPassword ? (
@@ -80,6 +139,9 @@ function Login() {
                                 <EyeInvisibleOutlined onClick={() => setIsPw(true)} />
                             )}
                         </div>
+                        <span ref={logPassowrdReg} className={cx('item-log')} style={{ display: 'none' }}>
+                            Please enter a password
+                        </span>
                     </div>
                     <div className={cx('item')}>
                         <span className={cx('recovery')}>Recovery Password</span>
