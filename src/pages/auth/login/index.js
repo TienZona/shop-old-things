@@ -8,16 +8,22 @@ import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
-
 import { message } from 'antd';
 
 import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { addUser } from '~/redux/actions/auth';
+import Loading from '~/components/Global/Loading';
 
 const cx = classNames.bind(styles);
 
 function Login() {
     const navigate = useNavigate();
+    const user = useSelector((state) => state.user);
+    const dispatch = useDispatch();
+
     const [cookies, setCookie] = useCookies(['access_token', 'refresh_token']);
+    const [isLoader, setIsLoader] = useState(false);
     const [isPassword, setIsPw] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -69,8 +75,9 @@ function Login() {
             username: username,
             password: password,
         };
+        setIsLoader(true);
         axios
-            .post('https://localhost:44352/api/Auth/login', JSON.stringify(formData), {
+            .post(`https://localhost:44352/api/Auth/login`, JSON.stringify(formData), {
                 headers: {
                     'content-type': 'application/json',
                     'Access-Control-Allow-Origin': '*',
@@ -79,29 +86,31 @@ function Login() {
             .then((res) => {
                 if (res.status === 200) {
                     message.success('Successful Login');
-
                     let expires = new Date();
                     expires.setTime(expires.getTime() + res.data.expireDate * 1000);
                     setCookie('access_token', res.data.token, { path: '/', expires });
                     getProfile(res.data.token);
-                    console.log(res.data.token);
-                    // setTimeout(() => {
-                    //     navigate('/home');
-                    // }, 2000);
+                    setIsLoader(false);
                 }
             })
-            .catch((err) => message.error(err.response.data.message));
+            .catch((err) => {
+                setIsLoader(false);
+                message.error(err.response.data.message);
+            });
     };
 
     const getProfile = (token) => {
+        console.log(token);
         axios
-            .get('https://localhost:44352/api/User/getMyProfile', {
+            .get(`https://localhost:44352/api/User/getMyProfile`, {
                 headers: {
-                    Authorization: `Basic ${token}`,
-                    'Access-Control-Allow-Origin': '*',
+                    Authorization: `Bearer ${token}`,
+                    'content-type': 'application/json',
                 },
             })
-            .then((res) => console.log(res))
+            .then((res) => {
+                dispatch(addUser(res.data));
+            })
             .catch((err) => console.log(err));
     };
 
@@ -170,6 +179,7 @@ function Login() {
                     </div>
                 </div>
             </div>
+            {isLoader && <Loading />}
         </div>
     );
 }

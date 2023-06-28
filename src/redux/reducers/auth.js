@@ -1,24 +1,20 @@
 const initialState = {
-    list: [],
-    selectedId: null,
+    user: null,
 };
 
 const userReducer = (state = initialState, action) => {
     switch (action.type) {
         case 'ADD_USER': {
-            const newList = [...state.list];
-            newList.push(action.payload);
             return {
                 ...state,
-                list: newList,
+                user: action.payload,
             };
         }
 
         case 'REMOVE_USER': {
-            const newList = [...state.list];
             return {
                 ...state,
-                list: newList.filter((item) => item.socketID !== action.payload),
+                user: null,
             };
         }
 

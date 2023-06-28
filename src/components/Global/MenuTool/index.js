@@ -11,36 +11,41 @@ import axios from 'axios';
 const cx = classNames.bind(styles);
 
 function MenuTool() {
+    const [listImage, setListImage] = useState([]);
     const [isIconA, setIconA] = useState(false);
     const [colorHex, setColorHex] = useState('#1677ff');
     const [formatHex, setFormatHex] = useState('hex');
     const [open, setOpen] = useState(false);
     const [listProvince, setListProvince] = useState([]);
     const [listDistrict, setListDistricts] = useState([]);
+    const [categorys, setCategorys] = useState([]);
+    const [brands, setBrands] = useState([]);
+
+    // form value
+    const [description, setDescription] = useState('');
+    const [stock, setStock] = useState('');
+    const [price, setPrice] = useState('');
+    const [statusValue, setStatus] = useState('');
+    const [category, setCategory] = useState('');
+    const [brand, setBrand] = useState('');
+    const [color, setColor] = useState('');
+    const [productName, setProductName] = useState('');
+
     const { TextArea } = Input;
-    const onChange = (e) => {
-        console.log('Change:', e.target.value);
-    };
-    const categorys = [
+
+    const status = [
         {
-            value: '1',
-            label: 'Điện thoại di động',
+            value: 'new',
+            label: 'Mới',
         },
         {
-            value: '2',
-            label: 'Máy tính bảng',
-        },
-        {
-            value: '3',
-            label: 'Máy tính xách tay',
-        },
-        {
-            value: '4',
-            label: 'Đồng hồ thông minh',
+            value: 'old',
+            label: 'Cũ',
         },
     ];
 
     useEffect(() => {
+        // get api provinces
         axios
             .get(`https://provinces.open-api.vn/api/p/`)
             .then((res) => {
@@ -51,6 +56,40 @@ function MenuTool() {
                     };
                 });
                 setListProvince(newList);
+            })
+            .catch((err) => console.log(err));
+
+        // get api category
+        axios
+            .get(`https://localhost:44352/api/Category/getAll`)
+            .then((res) => {
+                if (res.status === 200) {
+                    const newList = res.data.map(function (item) {
+                        return {
+                            value: item.id,
+                            label: item.name,
+                        };
+                    });
+
+                    setCategorys(newList);
+                }
+            })
+            .catch((err) => console.log(err));
+
+        axios
+            .get(`https://localhost:44352/api/Brand/getAll`)
+            .then((res) => {
+                if (res.status === 200) {
+                    console.log(res.data);
+                    const newList = res.data.map(function (item) {
+                        return {
+                            value: item.id,
+                            label: item.name,
+                        };
+                    });
+                    console.log(newList);
+                    setBrands(newList);
+                }
             })
             .catch((err) => console.log(err));
     }, []);
@@ -75,6 +114,23 @@ function MenuTool() {
         console.log(listDistrict);
     }, [listDistrict]);
 
+    const submitForm = () => {
+        console.log(productName);
+        console.log(price);
+        console.log(category);
+    };
+
+    const uploadImage = () => {
+        // const data = new FormData();
+        // data.append('file', listImage[0].originFileObj);
+        // data.append('upload_preset', process.env.REACT_APP_CLOUDINARY_PRESET);
+        // data.append('cloud_name', process.env.REACT_APP_CLOUDINARY_NAME);
+        // axios
+        //     .post(`https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_NAME}/image/upload`, data)
+        //     .then((res) => console.log(res))
+        //     .catch((err) => console.log(err));
+    };
+
     const closeModal = () => {
         setIconA(false);
         setOpen(false);
@@ -94,7 +150,7 @@ function MenuTool() {
                 title="Đăng tin"
                 centered
                 open={open}
-                onOk={() => closeModal()}
+                onOk={() => submitForm()}
                 onCancel={() => closeModal()}
                 width={1200}
             >
@@ -103,7 +159,7 @@ function MenuTool() {
                         <h1 className="text-center mb-5">
                             Hình ảnh sản phẩm <span>{'( Không quá 6 hình )'}</span>
                         </h1>
-                        <UploadImage />
+                        <UploadImage listImage={listImage} setListImage={setListImage} />
                     </div>
                     <div className={cx('content')}>
                         <div className="grid grid-cols-2">
@@ -118,7 +174,7 @@ function MenuTool() {
                                         style={{
                                             width: 300,
                                         }}
-                                        placeholder="Search to Select"
+                                        placeholder="Chọn thể loại"
                                         optionFilterProp="children"
                                         filterOption={(input, option) => (option?.label ?? '').includes(input)}
                                         filterSort={(optionA, optionB) =>
@@ -126,6 +182,7 @@ function MenuTool() {
                                                 .toLowerCase()
                                                 .localeCompare((optionB?.label ?? '').toLowerCase())
                                         }
+                                        onChange={(e) => setCategory(e)}
                                         options={categorys}
                                     />
                                 </div>
@@ -141,7 +198,7 @@ function MenuTool() {
                                                 height: 60,
                                                 marginBottom: 24,
                                             }}
-                                            onChange={onChange}
+                                            onChange={(e) => setProductName(e.target.value)}
                                             placeholder="..."
                                         />
                                     </div>
@@ -212,11 +269,12 @@ function MenuTool() {
                                         Tình trạng <span className="text-red-600">*</span>
                                     </h2>
                                     <Select
-                                        defaultValue="lucy"
+                                        defaultValue="new"
                                         style={{
                                             width: 300,
                                         }}
-                                        options={categorys}
+                                        onChange={(e) => setStatus(e)}
+                                        options={status}
                                     />
                                 </div>
                                 <div className={cx('item')}>
@@ -224,11 +282,12 @@ function MenuTool() {
                                         Hãng <span className="text-red-600">*</span>
                                     </h2>
                                     <Select
-                                        defaultValue="lucy"
+                                        labelInValue="Chọn hãng"
                                         style={{
                                             width: 300,
                                         }}
-                                        options={categorys}
+                                        onChange={(e) => setBrand(e)}
+                                        options={brands}
                                     />
                                 </div>
                                 <div className={cx('item')}>
@@ -251,6 +310,7 @@ function MenuTool() {
                                         style={{
                                             width: '300px',
                                         }}
+                                        onChange={(e) => setPrice(e)}
                                         prefix="đ"
                                         suffix="Coin"
                                         type="number"
@@ -268,7 +328,7 @@ function MenuTool() {
                                                 height: 100,
                                                 marginBottom: 24,
                                             }}
-                                            onChange={onChange}
+                                            onChange={(e) => setDescription(e.target.value)}
                                             placeholder="..."
                                         />
                                     </div>

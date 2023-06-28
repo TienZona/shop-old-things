@@ -4,6 +4,8 @@ import { Cloudinary } from '@cloudinary/url-gen';
 import { PlusOutlined } from '@ant-design/icons';
 import { Modal, Upload } from 'antd';
 import { useState } from 'react';
+import UploadFile from '../UploadFile';
+import axios from 'axios';
 const getBase64 = (file) =>
     new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -14,12 +16,10 @@ const getBase64 = (file) =>
 
 const cx = classNames.bind(styles);
 
-function UploadImage() {
+function UploadImage({ listImage, setListImage }) {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
-    const [fileList, setFileList] = useState([]);
-    const cld = new Cloudinary({ cloud: { cloudName: 'drtmlglka' } });
 
     const handleCancel = () => setPreviewOpen(false);
     const handlePreview = async (file) => {
@@ -30,7 +30,10 @@ function UploadImage() {
         setPreviewOpen(true);
         setPreviewTitle(file.name || file.url.substring(file.url.lastIndexOf('/') + 1));
     };
-    const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
+    const handleChange = ({ fileList: newFileList }) => {
+        setListImage(newFileList);
+        upload(newFileList[newFileList.length - 1]);
+    };
     const uploadButton = (
         <div>
             <PlusOutlined />
@@ -43,17 +46,29 @@ function UploadImage() {
             </div>
         </div>
     );
-    console.log(process.env.REACT_APP_CLOUDINARY_KEY);
+
+    const upload = (file) => {
+        const data = new FormData();
+        data.append('file', file);
+        data.append('upload_preset', 'nem2abes');
+        data.append('cloud_name', 'drtmlglka');
+
+        // axios
+        //     .post(`https://api.cloudinary.com/v1_1/drtmlglka/image/upload`, data)
+        //     .then((res) => console.log(res))
+        //     .catch((err) => console.log(err));
+    };
+
     return (
         <div className={cx('wrap')}>
             <Upload
-                // action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
                 listType="picture-card"
-                fileList={fileList}
+                fileList={listImage}
                 onPreview={handlePreview}
                 onChange={handleChange}
+                beforeUpload={() => false}
             >
-                {fileList.length >= 6 ? null : uploadButton}
+                {listImage.length >= 6 ? null : uploadButton}
             </Upload>
             <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
                 <img

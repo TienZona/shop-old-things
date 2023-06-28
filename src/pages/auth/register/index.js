@@ -6,12 +6,14 @@ import { Link, json } from 'react-router-dom';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { Checkbox, message } from 'antd';
 import axios, { formToJSON } from 'axios';
+import Loading from '~/components/Global/Loading';
 
 const cx = classNames.bind(styles);
 
 function Register() {
     const [messageApi, contextHolder] = message.useMessage();
     // hook state
+    const [isLoader, setIsLoader] = useState(false);
     const [isPassword, setIsPw] = useState(false);
     const [isConfirmPw, setIsConfirmPw] = useState(false);
     const [userName, setUsername] = useState('');
@@ -94,6 +96,7 @@ function Register() {
     };
 
     const register = () => {
+        setIsLoader(true);
         const formData = {
             username: userName,
             email: email,
@@ -109,13 +112,15 @@ function Register() {
             .then((res) => {
                 if (res.status === 200) {
                     message.success('Successful Registration');
+                    setIsLoader(false);
                 }
             })
-            .catch((err) =>
+            .catch((err) => {
                 err.response.data.errors.forEach((err) => {
                     message.error(err);
-                }),
-            );
+                });
+                setIsLoader(false);
+            });
     };
     return (
         <div className={cx('wrap')}>
@@ -210,6 +215,7 @@ function Register() {
                     </div>
                 </div>
             </div>
+            {isLoader && <Loading />}
         </div>
     );
 }

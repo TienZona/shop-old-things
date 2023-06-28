@@ -8,10 +8,18 @@ import watch from '~/assets/icon/smart-watch.png';
 import laptop from '~/assets/icon/laptop.png';
 import Slider from '~/components/HomePage/Slider';
 import CardNews from '~/components/Global/CardNews';
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
 
 const cx = classNames.bind(styles);
 
 function Home() {
+    const auth = useSelector((state) => state.auth);
+
+    useEffect(() => {
+        console.log(auth.user);
+    }, []);
+
     return (
         <div className={cx('wrap')}>
             <div className={cx('container')}>
