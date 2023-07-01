@@ -1,11 +1,10 @@
 import classNames from 'classnames/bind';
 import styles from './UploadImage.module.scss';
-import { Cloudinary } from '@cloudinary/url-gen';
 import { PlusOutlined } from '@ant-design/icons';
 import { Modal, Upload } from 'antd';
 import { useState } from 'react';
-import UploadFile from '../UploadFile';
 import axios from 'axios';
+
 const getBase64 = (file) =>
     new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -31,8 +30,7 @@ function UploadImage({ listImage, setListImage }) {
         setPreviewTitle(file.name || file.url.substring(file.url.lastIndexOf('/') + 1));
     };
     const handleChange = ({ fileList: newFileList }) => {
-        setListImage(newFileList);
-        upload(newFileList[newFileList.length - 1]);
+        uploadImage(newFileList[newFileList.length - 1].originFileObj);
     };
     const uploadButton = (
         <div>
@@ -47,16 +45,30 @@ function UploadImage({ listImage, setListImage }) {
         </div>
     );
 
-    const upload = (file) => {
+    const uploadImage = (file) => {
         const data = new FormData();
         data.append('file', file);
-        data.append('upload_preset', 'nem2abes');
+        data.append('upload_preset', 'qbkvgvkb');
         data.append('cloud_name', 'drtmlglka');
 
-        // axios
-        //     .post(`https://api.cloudinary.com/v1_1/drtmlglka/image/upload`, data)
-        //     .then((res) => console.log(res))
-        //     .catch((err) => console.log(err));
+        postImage();
+    };
+
+    const postImage = (data) => {
+        axios
+            .post(`https://api.cloudinary.com/v1_1/drtmlglka/image/upload`, data)
+            .then((res) => {
+                const newImg = {
+                    id: 0,
+                    url: res.data.url,
+                    isCover: false,
+                    isVideo: false,
+                    isDeleted: false,
+                    isNewlyAdded: false,
+                };
+                setListImage((prev) => [...prev, newImg]);
+            })
+            .catch((err) => console.log(err));
     };
 
     return (

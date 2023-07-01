@@ -14,14 +14,23 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import profileUser from '~/assets/icon/profile-user.png';
 import { useSelector } from 'react-redux';
+import { useCookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 function UserNav() {
-    const auth = useSelector((state) => state.auth);
+    const [cookies, setCookies, removeCookies] = useCookies(['user']);
+    const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const onClose = () => {
         setOpen(false);
+    };
+
+    const logout = () => {
+        removeCookies('user');
+
+        navigate('/login');
     };
 
     return (
@@ -30,7 +39,7 @@ function UserNav() {
                 <img className={cx('avatar')} src={profileUser} alt="" />
             </div>
             <Drawer closeIcon={null} extra={<UserHead />} placement="right" onClose={onClose} open={open}>
-                {auth.user && (
+                {cookies.user && (
                     <div className={cx('body')}>
                         <div className={cx('box')}>
                             <h1 className={cx('heading')}>Quản lí đơn hàng</h1>
@@ -70,8 +79,8 @@ function UserNav() {
                         </div>
                         <div className={cx('box')}>
                             <h1 className={cx('heading')}>Khác</h1>
-                            {auth.user ? (
-                                <div className={cx('item')}>
+                            {cookies.user ? (
+                                <div className={cx('item')} onClick={() => logout()}>
                                     <div className={cx('icon')} style={{ backgroundColor: '#2CD3E1' }}>
                                         <FontAwesomeIcon icon={faRightFromBracket} />
                                     </div>

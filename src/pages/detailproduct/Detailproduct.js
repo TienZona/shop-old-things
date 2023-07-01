@@ -31,6 +31,11 @@ const Detailproduct = () => {
         'https://cdn.tgdd.vn/Products/Images/42/251192/iphone-14-pro-max-bac-2.jpg',
         'https://cdn.tgdd.vn/Products/Images/42/251192/iphone-14-pro-max-bac-3.jpg',
     ];
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     return (
         <div style={{}}>
             <div className="card-wrapper">

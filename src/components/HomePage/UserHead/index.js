@@ -6,15 +6,16 @@ import avatar from '~/assets/images/Avatar_FB.jpg';
 import userIcon from '~/assets/icon/user.png';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useCookies } from 'react-cookie';
 
 const cx = classNames.bind(styles);
 
 function UserHead() {
-    const auth = useSelector((state) => state.auth);
+    const [cookies, setCookies] = useCookies(['user']);
 
     return (
         <div className={cx('wrap')}>
-            {auth.user ? (
+            {cookies.user ? (
                 <Link to="/user/123">
                     <div className={cx('user')}>
                         <Avatar size={40} src={<img src={avatar} alt="avatar" />} />

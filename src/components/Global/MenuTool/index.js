@@ -4,32 +4,41 @@ import classNames from 'classnames/bind';
 
 import { useState, useMemo, useEffect } from 'react';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import { Modal, Select, ColorPicker, Input, InputNumber } from 'antd';
+import { Modal, Select, ColorPicker, Input, InputNumber, message } from 'antd';
 import UploadImage from '../UploadImage';
+import { useNavigate } from 'react-router-dom';
 import { PhoneOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { useCookies } from 'react-cookie';
+import UploadVideo from '../UploadVideo';
 const cx = classNames.bind(styles);
 
 function MenuTool() {
+    const [cookies, setCookie] = useCookies(['access_token'], ['user']);
+    const auth = useSelector((state) => state.auth);
+    const [messageApi, contextHolder] = message.useMessage();
+    const navigate = useNavigate();
+
     const [listImage, setListImage] = useState([]);
     const [isIconA, setIconA] = useState(false);
-    const [colorHex, setColorHex] = useState('#1677ff');
-    const [formatHex, setFormatHex] = useState('hex');
     const [open, setOpen] = useState(false);
     const [listProvince, setListProvince] = useState([]);
     const [listDistrict, setListDistricts] = useState([]);
     const [categorys, setCategorys] = useState([]);
     const [brands, setBrands] = useState([]);
+    const [colors, setColors] = useState([]);
+    const [sizes, setSizes] = useState([]);
 
     // form value
     const [description, setDescription] = useState('');
-    const [stock, setStock] = useState('');
     const [price, setPrice] = useState('');
     const [statusValue, setStatus] = useState('');
     const [category, setCategory] = useState('');
     const [brand, setBrand] = useState('');
     const [color, setColor] = useState('');
     const [productName, setProductName] = useState('');
+    const [size, setSize] = useState('');
 
     const { TextArea } = Input;
 
@@ -76,19 +85,52 @@ function MenuTool() {
             })
             .catch((err) => console.log(err));
 
+        // get api brand
         axios
             .get(`https://localhost:44352/api/Brand/getAll`)
             .then((res) => {
                 if (res.status === 200) {
-                    console.log(res.data);
                     const newList = res.data.map(function (item) {
                         return {
                             value: item.id,
                             label: item.name,
                         };
                     });
-                    console.log(newList);
                     setBrands(newList);
+                }
+            })
+            .catch((err) => console.log(err));
+
+        // get api colors
+        axios
+            .get(`https://localhost:44352/api/Color/getAll`)
+            .then((res) => {
+                if (res.status === 200) {
+                    const newList = res.data.map(function (item) {
+                        return {
+                            value: item.id,
+                            label: item.colorName,
+                        };
+                    });
+                    console.log(newList);
+                    setColors(newList);
+                }
+            })
+            .catch((err) => console.log(err));
+
+        // get api sizes
+        axios
+            .get(`https://localhost:44352/api/Size/getAll`)
+            .then((res) => {
+                if (res.status === 200) {
+                    const newList = res.data.map(function (item) {
+                        return {
+                            value: item.id,
+                            label: item.sizeName,
+                        };
+                    });
+                    console.log(newList);
+                    setSizes(newList);
                 }
             })
             .catch((err) => console.log(err));
@@ -110,35 +152,62 @@ function MenuTool() {
             .catch((err) => console.log(err));
     };
 
-    useEffect(() => {
-        console.log(listDistrict);
-    }, [listDistrict]);
-
     const submitForm = () => {
-        console.log(productName);
-        console.log(price);
-        console.log(category);
+        if (validator()) {
+            const data = {
+                name: productName,
+                description: description,
+                stock: 0,
+                price: price,
+                status: 0,
+                isHidden: true,
+                categoryId: category,
+                brandId: brand,
+                userId: cookies.user.userId,
+                sizeId: size,
+                colorId: color,
+                images: listImage,
+            };
+            console.log(data);
+            axios
+                .post(`https://localhost:44352/api/Product/add`, data, {
+                    headers: {
+                        Authorization: `Bearer ${cookies.access_token}`,
+                        'content-type': 'application/json',
+                    },
+                })
+                .then((res) => console.log(res))
+                .catch((err) => console.log(err));
+        }
     };
 
-    const uploadImage = () => {
-        // const data = new FormData();
-        // data.append('file', listImage[0].originFileObj);
-        // data.append('upload_preset', process.env.REACT_APP_CLOUDINARY_PRESET);
-        // data.append('cloud_name', process.env.REACT_APP_CLOUDINARY_NAME);
-        // axios
-        //     .post(`https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_NAME}/image/upload`, data)
-        //     .then((res) => console.log(res))
-        //     .catch((err) => console.log(err));
+    const validator = () => {
+        console.log(listImage.length);
+        if (listImage.length < 2) {
+            alert('Tối thiểu 2 hình ảnh về sản phẩm!');
+            return false;
+        }
+
+        return true;
     };
 
     const closeModal = () => {
         setIconA(false);
         setOpen(false);
     };
-    const hexString = useMemo(() => (typeof colorHex === 'string' ? colorHex : colorHex.toHexString()), [colorHex]);
+    const clickButton = () => {
+        if (auth !== undefined) {
+            setIconA(!isIconA);
+        } else {
+            message.info('Bạn cần đăng nhập để được đăng tin!');
+            setTimeout(() => {
+                navigate('/login');
+            }, 1000);
+        }
+    };
     return (
         <div className={cx('wrap')}>
-            <div className={cx('btn', isIconA && 'btn-close')} onClick={() => setIconA(!isIconA)}>
+            <div className={cx('btn', isIconA && 'btn-close')} onClick={() => clickButton()}>
                 <FontAwesomeIcon icon={faPlus} className={cx('icon', isIconA ? 'icon-in' : 'icon-out')} />
             </div>
             <div className={cx('list')}>
@@ -157,9 +226,13 @@ function MenuTool() {
                 <div className={cx('box')}>
                     <div className={cx('upload')}>
                         <h1 className="text-center mb-5">
-                            Hình ảnh sản phẩm <span>{'( Không quá 6 hình )'}</span>
+                            Hình ảnh sản phẩm <span>{'( Tối thiểu 2 hình )'}</span>
                         </h1>
                         <UploadImage listImage={listImage} setListImage={setListImage} />
+                        <h1 className="text-center mb-5">
+                            Video sản phẩm <span>{'( Tối thiểu 1 video )'}</span>
+                        </h1>
+                        <UploadVideo />
                     </div>
                     <div className={cx('content')}>
                         <div className="grid grid-cols-2">
@@ -266,15 +339,15 @@ function MenuTool() {
                                 <h1 className={cx('heading-1')}>Thông tin chi tiết</h1>
                                 <div className={cx('item')}>
                                     <h2 className={cx('heading-2')}>
-                                        Tình trạng <span className="text-red-600">*</span>
+                                        Size <span className="text-red-600">*</span>
                                     </h2>
                                     <Select
-                                        defaultValue="new"
+                                        defaultValue=""
                                         style={{
                                             width: 300,
                                         }}
-                                        onChange={(e) => setStatus(e)}
-                                        options={status}
+                                        onSelect={(e) => setSize(e)}
+                                        options={sizes}
                                     />
                                 </div>
                                 <div className={cx('item')}>
@@ -286,7 +359,7 @@ function MenuTool() {
                                         style={{
                                             width: 300,
                                         }}
-                                        onChange={(e) => setBrand(e)}
+                                        onSelect={(e) => setBrand(e.value)}
                                         options={brands}
                                     />
                                 </div>
@@ -294,13 +367,14 @@ function MenuTool() {
                                     <h2 className={cx('heading-2')}>
                                         Màu sắc<span className="text-red-600">*</span>
                                     </h2>
-                                    <ColorPicker
-                                        format={formatHex}
-                                        value={colorHex}
-                                        onChange={setColorHex}
-                                        onFormatChange={setFormatHex}
+                                    <Select
+                                        labelInValue="Chọn màu"
+                                        style={{
+                                            width: 300,
+                                        }}
+                                        onSelect={(e) => setColor(e.value)}
+                                        options={colors}
                                     />
-                                    <span className="px-3">{hexString}</span>
                                 </div>
                                 <div className={cx('item')}>
                                     <h2 className={cx('heading-2')}>

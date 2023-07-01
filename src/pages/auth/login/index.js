@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import googleIcon from '~/assets/icon/google.png';
 import facebookIcon from '~/assets/icon/facebook.png';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { Link, json } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
@@ -22,7 +22,7 @@ function Login() {
     const user = useSelector((state) => state.user);
     const dispatch = useDispatch();
 
-    const [cookies, setCookie] = useCookies(['access_token', 'refresh_token']);
+    const [cookies, setCookie] = useCookies(['access_token']);
     const [isLoader, setIsLoader] = useState(false);
     const [isPassword, setIsPw] = useState(false);
     const [username, setUsername] = useState('');
@@ -100,7 +100,6 @@ function Login() {
     };
 
     const getProfile = (token) => {
-        console.log(token);
         axios
             .get(`https://localhost:44352/api/User/getMyProfile`, {
                 headers: {
@@ -110,6 +109,17 @@ function Login() {
             })
             .then((res) => {
                 dispatch(addUser(res.data));
+                let expires = new Date();
+                expires.setTime(expires.getTime() + res.data.expireDate * 1000);
+                const user = {
+                    id: res.data.id,
+                    username: res.data.username,
+                    email: res.data.email,
+                    avatarUrl: res.data.avatarUrl,
+                };
+                const data = JSON.stringify(user);
+                setCookie('user', data, { path: '/', expires });
+                navigate('/home');
             })
             .catch((err) => console.log(err));
     };
