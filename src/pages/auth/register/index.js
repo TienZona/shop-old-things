@@ -116,10 +116,13 @@ function Register() {
                 }
             })
             .catch((err) => {
-                err.response.data.errors.forEach((err) => {
-                    message.error(err);
-                });
-                setIsLoader(false);
+                if (err.response.status === 400) {
+                    err.response.data.errors.forEach((err) => {
+                        message.error(err);
+                    });
+                    console.log(err);
+                    setIsLoader(false);
+                }
             });
     };
     return (
@@ -135,6 +138,7 @@ function Register() {
                                 onChange={(e) => setUsername(e.target.value)}
                                 type="text"
                                 placeholder="Enter your username"
+                                onKeyDown={(e) => e.key === 'Enter' && submitRegister()}
                             />
                             <span ref={loguserName} className={cx('item-log')} style={{ display: 'none' }}>
                                 Enter username
@@ -146,6 +150,7 @@ function Register() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 type="email"
+                                onKeyDown={(e) => e.key === 'Enter' && submitRegister()}
                                 placeholder="Enter your email"
                             />
                             <span ref={logEmail} className={cx('item-log')} style={{ display: 'none' }}>
@@ -159,6 +164,7 @@ function Register() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 type={isPassword ? 'text' : 'password'}
+                                onKeyDown={(e) => e.key === 'Enter' && submitRegister()}
                                 placeholder="Password"
                             />
                             <div className={cx('icon')}>
@@ -179,6 +185,7 @@ function Register() {
                                 value={confirmPW}
                                 onChange={(e) => setConfirmPW(e.target.value)}
                                 type={isConfirmPw ? 'text' : 'password'}
+                                onKeyDown={(e) => e.key === 'Enter' && submitRegister()}
                                 placeholder="Confirm password"
                             />
                             <div className={cx('icon')}>

@@ -1,7 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './UploadImage.module.scss';
 import { PlusOutlined } from '@ant-design/icons';
-import { Modal, Upload } from 'antd';
+import { Modal, Upload, message } from 'antd';
 import { useState } from 'react';
 import axios from 'axios';
 
@@ -48,7 +48,7 @@ function UploadImage({ listImage, setListImage }) {
     const uploadImage = (file) => {
         const data = new FormData();
         data.append('file', file);
-        data.append('upload_preset', 'qbkvgvkb');
+        data.append('upload_preset', 'j9ye6xfu');
         data.append('cloud_name', 'drtmlglka');
 
         postImage();
@@ -68,7 +68,9 @@ function UploadImage({ listImage, setListImage }) {
                 };
                 setListImage((prev) => [...prev, newImg]);
             })
-            .catch((err) => console.log(err));
+            .catch((err) => {
+                message.error('Không thể tải ảnh lên!');
+            });
     };
 
     return (
