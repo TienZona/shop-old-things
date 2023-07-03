@@ -37,7 +37,7 @@ function Slider() {
             <img className={cx('img')} src={active} alt="" />
             <div className={cx('list')}>
                 {slide.map((item, index) => (
-                    <div className={cx('item', timer === index && 'active')}></div>
+                    <div key={index} className={cx('item', timer === index && 'active')}></div>
                 ))}
             </div>
         </div>

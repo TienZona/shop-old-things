@@ -7,33 +7,33 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { Modal, Select, ColorPicker, Input, InputNumber, message } from 'antd';
 import UploadImage from '../UploadImage';
 import { useNavigate } from 'react-router-dom';
-import { PhoneOutlined } from '@ant-design/icons';
+
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { useCookies } from 'react-cookie';
 import UploadVideo from '../UploadVideo';
+import Loading from '../Loading';
+import CreateAddress from '../CreateAddress';
 const cx = classNames.bind(styles);
 
 function MenuTool() {
     const [cookies, setCookie] = useCookies(['access_token'], ['user']);
-    const auth = useSelector((state) => state.auth);
-    const [messageApi, contextHolder] = message.useMessage();
     const navigate = useNavigate();
 
     const [listImage, setListImage] = useState([]);
+    const [listVideo, setListVideo] = useState([]);
     const [isIconA, setIconA] = useState(false);
     const [open, setOpen] = useState(false);
-    const [listProvince, setListProvince] = useState([]);
-    const [listDistrict, setListDistricts] = useState([]);
     const [categorys, setCategorys] = useState([]);
     const [brands, setBrands] = useState([]);
     const [colors, setColors] = useState([]);
     const [sizes, setSizes] = useState([]);
+    const [isLoader, setIsLoader] = useState(false);
+    const [addressUser, setAddressUser] = useState(null);
 
     // form value
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState('');
-    const [statusValue, setStatus] = useState('');
     const [category, setCategory] = useState('');
     const [brand, setBrand] = useState('');
     const [color, setColor] = useState('');
@@ -54,20 +54,6 @@ function MenuTool() {
     ];
 
     useEffect(() => {
-        // get api provinces
-        axios
-            .get(`https://provinces.open-api.vn/api/p/`)
-            .then((res) => {
-                let newList = res.data.map((item) => {
-                    return {
-                        value: item.code,
-                        label: item.name,
-                    };
-                });
-                setListProvince(newList);
-            })
-            .catch((err) => console.log(err));
-
         // get api category
         axios
             .get(`https://localhost:44352/api/Category/getAll`)
@@ -112,7 +98,6 @@ function MenuTool() {
                             label: item.colorName,
                         };
                     });
-                    console.log(newList);
                     setColors(newList);
                 }
             })
@@ -129,28 +114,28 @@ function MenuTool() {
                             label: item.sizeName,
                         };
                     });
-                    console.log(newList);
                     setSizes(newList);
                 }
             })
             .catch((err) => console.log(err));
-    }, []);
 
-    const getDistricts = (code) => {
+        // get address user
         axios
-            .get(`https://provinces.open-api.vn/api/p/${code}?depth=2`)
+            .get(`https://localhost:44352/api/ShippingAddress/getUserAddress`, {
+                headers: {
+                    Authorization: `Bearer ${cookies.access_token}`,
+                    'content-type': 'application/json',
+                },
+            })
             .then((res) => {
-                setListDistricts(
-                    res.data.districts.map((districts) => {
-                        return {
-                            value: districts.code,
-                            label: districts.name,
-                        };
-                    }),
-                );
+                if (res.status === 200) {
+                    const data = res.data.filter((address) => address.isDefault === true);
+                    console.log(data);
+                    setAddressUser(data[0]);
+                }
             })
             .catch((err) => console.log(err));
-    };
+    }, []);
 
     const submitForm = () => {
         if (validator()) {
@@ -160,31 +145,67 @@ function MenuTool() {
                 stock: 0,
                 price: price,
                 status: 0,
-                isHidden: true,
                 categoryId: category,
                 brandId: brand,
-                userId: cookies.user.userId,
+                userId: cookies.user.id,
                 sizeId: size,
                 colorId: color,
                 images: listImage,
             };
-            console.log(data);
+
+            setIsLoader(true);
             axios
-                .post(`https://localhost:44352/api/Product/add`, data, {
+                .post(`https://localhost:44352/api/Product/add`, JSON.stringify(data), {
                     headers: {
                         Authorization: `Bearer ${cookies.access_token}`,
                         'content-type': 'application/json',
                     },
                 })
-                .then((res) => console.log(res))
+                .then((res) => {
+                    if (res.status === 200) {
+                        message.success('Thêm sản phẩm thành công!');
+                        setIsLoader(false);
+                        setOpen(false);
+                    }
+                })
                 .catch((err) => console.log(err));
         }
     };
 
     const validator = () => {
-        console.log(listImage.length);
         if (listImage.length < 2) {
-            alert('Tối thiểu 2 hình ảnh về sản phẩm!');
+            message.info('Tối thiểu 2 hình ảnh về sản phẩm!');
+            return false;
+        }
+
+        if (listVideo.length < 1) {
+            message.info('Tối thiểu 1 video về sản phẩm!');
+            return false;
+        }
+        if (category === '') {
+            message.info('Vui lòng chọn thể loại sản phẩm!');
+            return false;
+        }
+
+        if (productName === '') {
+            message.info('Vui lòng nhập tên sản phẩm!');
+            return false;
+        }
+
+        if (size === '') {
+            message.info('Vui lòng chọn size sản phẩm!');
+            return false;
+        }
+        if (brand === '') {
+            message.info('Vui lòng chọn hãng sản phẩm!');
+            return false;
+        }
+        if (color === '') {
+            message.info('Vui lòng chọn màu sắc sản phẩm!');
+            return false;
+        }
+        if (price === '') {
+            message.info('Vui lòng nhập giá bán sản phẩm!');
             return false;
         }
 
@@ -196,17 +217,17 @@ function MenuTool() {
         setOpen(false);
     };
     const clickButton = () => {
-        if (auth !== undefined) {
+        if (cookies.user !== undefined) {
             setIconA(!isIconA);
         } else {
             message.info('Bạn cần đăng nhập để được đăng tin!');
-            setTimeout(() => {
-                navigate('/login');
-            }, 1000);
+            navigate('/login');
         }
     };
+
     return (
         <div className={cx('wrap')}>
+            {isLoader && <Loading />}
             <div className={cx('btn', isIconA && 'btn-close')} onClick={() => clickButton()}>
                 <FontAwesomeIcon icon={faPlus} className={cx('icon', isIconA ? 'icon-in' : 'icon-out')} />
             </div>
@@ -221,6 +242,7 @@ function MenuTool() {
                 open={open}
                 onOk={() => submitForm()}
                 onCancel={() => closeModal()}
+                okButtonProps={{ type: 'default ' }}
                 width={1200}
             >
                 <div className={cx('box')}>
@@ -232,7 +254,7 @@ function MenuTool() {
                         <h1 className="text-center mb-5">
                             Video sản phẩm <span>{'( Tối thiểu 1 video )'}</span>
                         </h1>
-                        <UploadVideo />
+                        <UploadVideo listVideo={listVideo} setListVideo={setListVideo} />
                     </div>
                     <div className={cx('content')}>
                         <div className="grid grid-cols-2">
@@ -276,63 +298,22 @@ function MenuTool() {
                                         />
                                     </div>
                                 </div>
-                                <h3 className={cx('heading-1')}>Thông tin người bán</h3>
                                 <div className={cx('item')}>
                                     <h2 className={cx('heading-2')}>
-                                        Số điện thoại <span className="text-red-600">*</span>
+                                        Mô tả <span className="text-red-600">*</span>
                                     </h2>
-                                    <Input
-                                        type="tel"
-                                        style={{ width: '300px' }}
-                                        placeholder="..."
-                                        prefix={<PhoneOutlined />}
-                                    />
-                                </div>
-                                <div className={cx('item')}>
-                                    <h2 className={cx('heading-2')}>
-                                        Địa chỉ <span className="text-red-600">*</span>
-                                    </h2>
-
-                                    <Select
-                                        showSearch
-                                        style={{
-                                            width: 300,
-                                        }}
-                                        placeholder="Tỉnh"
-                                        optionFilterProp="children"
-                                        filterOption={(input, option) => (option?.label ?? '').includes(input)}
-                                        filterSort={(optionA, optionB) =>
-                                            (optionA?.label ?? '    ')
-                                                .toLowerCase()
-                                                .localeCompare((optionB?.label ?? '').toLowerCase())
-                                        }
-                                        onSelect={(value) => {
-                                            setListDistricts([]);
-                                            getDistricts(value);
-                                        }}
-                                        options={listProvince}
-                                    />
-                                </div>
-                                <div className={cx('item')}>
-                                    <h2 className={cx('heading-2')}>
-                                        {/* Địa chỉ - Tỉnh <span className="text-red-600">*</span> */}
-                                    </h2>
-                                    <Select
-                                        showSearch
-                                        style={{
-                                            width: 300,
-                                        }}
-                                        placeholder="Huyện/Quận"
-                                        optionFilterProp="children"
-                                        filterOption={(input, option) => (option?.label ?? '').includes(input)}
-                                        filterSort={(optionA, optionB) =>
-                                            (optionA?.label ?? '    ')
-                                                .toLowerCase()
-                                                .localeCompare((optionB?.label ?? '').toLowerCase())
-                                        }
-                                        onSelect={(value) => getDistricts(value)}
-                                        options={listDistrict}
-                                    />
+                                    <div style={{ width: '300px' }}>
+                                        <TextArea
+                                            showCount
+                                            maxLength={1000}
+                                            style={{
+                                                height: 60,
+                                                marginBottom: 24,
+                                            }}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                            placeholder="..."
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <div>
@@ -389,23 +370,6 @@ function MenuTool() {
                                         suffix="Coin"
                                         type="number"
                                     />
-                                </div>
-                                <div className={cx('item')}>
-                                    <h2 className={cx('heading-2')}>
-                                        Mô tả <span className="text-red-600">*</span>
-                                    </h2>
-                                    <div style={{ width: '300px' }}>
-                                        <TextArea
-                                            showCount
-                                            maxLength={1000}
-                                            style={{
-                                                height: 100,
-                                                marginBottom: 24,
-                                            }}
-                                            onChange={(e) => setDescription(e.target.value)}
-                                            placeholder="..."
-                                        />
-                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -6,10 +6,12 @@ import Search from '../../HomePage/Search';
 import UserNav from '~/components/HomePage/UserNav';
 import { Link } from 'react-router-dom';
 import MenuTool from '~/components/Global/MenuTool';
+import { useCookies } from 'react-cookie';
 
 const cx = classNames.bind(styles);
 
 function Header() {
+    const [cookies, setCookies] = useCookies(['user']);
     return (
         <div className={cx('wrap')}>
             <Link to="/home">
@@ -21,7 +23,7 @@ function Header() {
             <div>
                 <UserNav />
             </div>
-            <MenuTool />
+            {cookies.user && <MenuTool />}
         </div>
     );
 }

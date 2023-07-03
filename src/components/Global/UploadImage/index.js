@@ -16,6 +16,7 @@ const getBase64 = (file) =>
 const cx = classNames.bind(styles);
 
 function UploadImage({ listImage, setListImage }) {
+    const [images, setImages] = useState([]);
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
@@ -50,11 +51,6 @@ function UploadImage({ listImage, setListImage }) {
         data.append('file', file);
         data.append('upload_preset', 'j9ye6xfu');
         data.append('cloud_name', 'drtmlglka');
-
-        postImage();
-    };
-
-    const postImage = (data) => {
         axios
             .post(`https://api.cloudinary.com/v1_1/drtmlglka/image/upload`, data)
             .then((res) => {
@@ -62,11 +58,13 @@ function UploadImage({ listImage, setListImage }) {
                     id: 0,
                     url: res.data.url,
                     isCover: false,
-                    isVideo: false,
+                    isVideo: true,
                     isDeleted: false,
                     isNewlyAdded: false,
                 };
                 setListImage((prev) => [...prev, newImg]);
+                setImages((prev) => [...prev, { url: res.data.url }]);
+                console.log(res);
             })
             .catch((err) => {
                 message.error('Không thể tải ảnh lên!');
@@ -77,12 +75,12 @@ function UploadImage({ listImage, setListImage }) {
         <div className={cx('wrap')}>
             <Upload
                 listType="picture-card"
-                fileList={listImage}
+                fileList={images}
                 onPreview={handlePreview}
                 onChange={handleChange}
                 beforeUpload={() => false}
             >
-                {listImage.length >= 6 ? null : uploadButton}
+                {images.length >= 6 ? null : uploadButton}
             </Upload>
             <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
                 <img

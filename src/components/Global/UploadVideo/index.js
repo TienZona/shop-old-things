@@ -7,32 +7,29 @@ import axios from 'axios';
 
 const cx = classNames.bind(styles);
 
-function UploadVideo() {
+function UploadVideo({ listVideo, setListVideo }) {
     const uploadVideo = (file) => {
         const data = new FormData();
         data.append('file', file);
         data.append('upload_preset', 'qbkvgvkb');
         data.append('cloud_name', 'drtmlglka');
-
-        postVideo(data);
-    };
-
-    const postVideo = (data) => {
         axios
             .post(`https://api.cloudinary.com/v1_1/drtmlglka/video/upload`, data)
             .then((res) => {
-                const newImg = {
+                const newVideo = {
                     id: 0,
                     url: res.data.url,
                     isCover: false,
-                    isVideo: false,
+                    isVideo: true,
                     isDeleted: false,
                     isNewlyAdded: false,
                 };
+                setListVideo((prev) => [...prev, newVideo]);
                 console.log(res);
             })
             .catch((err) => console.log(err));
     };
+
     const uploadButton = (
         <div>
             <PlusOutlined />
@@ -47,8 +44,13 @@ function UploadVideo() {
     );
     return (
         <div className={cx('wrap')}>
-            <Upload listType="picture-card" onChange={(file) => uploadVideo(file.originFileObj)}>
-                {uploadButton}
+            <Upload
+                listType="picture-card"
+                fileList={listVideo}
+                beforeUpload={() => false}
+                onChange={(e) => uploadVideo(e.file)}
+            >
+                {listVideo.length >= 3 ? null : uploadButton}
             </Upload>
         </div>
     );

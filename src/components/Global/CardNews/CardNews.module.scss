@@ -6,6 +6,7 @@
     overflow: hidden;
     background-color: #fff;
     transition: all ease 0.4s;
+    border: 1px solid #ccc;
     box-shadow: 0 10px 10px rgba($color: #000000, $alpha: 0.1);
 
     &:hover {
