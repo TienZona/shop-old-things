@@ -22,11 +22,14 @@ function Home() {
     useEffect(() => {
         axios
             .get('https://localhost:44352/api/Product/getAll', {
-                isHidden: true,
+                params: {
+                    page: 0,
+                    size: 8,
+                },
             })
             .then((res) => {
                 if (res.status === 200) {
-                    setListProduct(res.data.result);
+                    setListProduct(res.data.productList);
                 }
             })
             .catch((err) => console.log(err));

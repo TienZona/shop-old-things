@@ -9,7 +9,7 @@ import ButtonSubmit from '../ButtonSubmit';
 import { faL } from '@fortawesome/free-solid-svg-icons';
 const cx = classNames.bind(styles);
 
-function CreateAddress() {
+function CreateAddress({ setReload }) {
     const [cookies, setCookies] = useCookies(['user']);
     const [listProvince, setListProvince] = useState([]);
     const [listDistrict, setListDistricts] = useState([]);
@@ -99,18 +99,6 @@ function CreateAddress() {
         );
     };
 
-    const getAddressUser = () => {
-        axios
-            .get('https://localhost:44352/api/ShippingAddress/getUserAddress', {
-                headers: {
-                    Authorization: `Bearer ${cookies.access_token}`,
-                    'content-type': 'application/json',
-                },
-            })
-            .then((res) => console.log(res))
-            .catch((err) => console.log(err));
-    };
-
     const createShippingAddress = (data) => {
         axios
             .post(`https://localhost:44352/api/ShippingAddress/create`, JSON.stringify(data), {
@@ -123,6 +111,7 @@ function CreateAddress() {
                 if (res.status === 200) {
                     message.success('Đã thêm địa chỉ');
                     setIsModalOpen(false);
+                    setReload((state) => !state);
                 }
             })
             .catch((err) => console.log(err));

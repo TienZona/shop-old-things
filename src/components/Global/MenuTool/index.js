@@ -42,17 +42,6 @@ function MenuTool() {
 
     const { TextArea } = Input;
 
-    const status = [
-        {
-            value: 'new',
-            label: 'Mới',
-        },
-        {
-            value: 'old',
-            label: 'Cũ',
-        },
-    ];
-
     useEffect(() => {
         // get api category
         axios
@@ -135,7 +124,7 @@ function MenuTool() {
                 }
             })
             .catch((err) => console.log(err));
-    }, []);
+    }, [cookies.access_token]);
 
     const submitForm = () => {
         if (validator()) {

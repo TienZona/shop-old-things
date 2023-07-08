@@ -26,14 +26,16 @@ function News() {
 
     useEffect(() => {
         if (search.get('search')) {
+            const data = {
+                keyWord: search.get('search'),
+                categoryId: 0,
+                brandId: 0,
+            };
             axios
-                .get('https://localhost:44352/api/Search', {
+                .get('https://localhost:44352/api/Search', JSON.stringify(data), {
                     headers: {
                         Authorization: `Bearer ${cookies.access_token}`,
                         'content-type': 'application/json',
-                    },
-                    params: {
-                        keyWord: search.get('search'),
                     },
                 })
                 .then((res) => {
@@ -42,10 +44,15 @@ function News() {
                 .catch((err) => console.log(err));
         } else {
             axios
-                .get('https://localhost:44352/api/Product/getAll')
+                .get('https://localhost:44352/api/Product/getAll', {
+                    params: {
+                        page: 0,
+                        size: 8,
+                    },
+                })
                 .then((res) => {
                     if (res.status === 200) {
-                        setListProduct(res.data.result);
+                        setListProduct(res.data.productList);
                     }
                 })
                 .catch((err) => console.log(err));
@@ -130,11 +137,15 @@ function News() {
                     </div>
                     <div className={cx('list')}>
                         <div className="grid grid-cols-4 gap-x-8 gap-y-12">
-                            {listProduct.map((product, index) => (
-                                <div key={index} className={cx('item')}>
-                                    <CardNews product={product} />
-                                </div>
-                            ))}
+                            {listProduct.length ? (
+                                listProduct?.map((product, index) => (
+                                    <div key={index} className={cx('item')}>
+                                        <CardNews product={product} />
+                                    </div>
+                                ))
+                            ) : (
+                                <h1 className="text-center">Không có sản phẩm nào</h1>
+                            )}
                         </div>
                     </div>
                     <div className="flex justify-center">

@@ -163,7 +163,9 @@ function Login() {
                         </span>
                     </div>
                     <div className={cx('item')}>
-                        <span className={cx('recovery')}>Recovery Password</span>
+                        <Link to={'/forgot'}>
+                            <span className={cx('recovery')}>Recovery Password</span>
+                        </Link>
                     </div>
                     <div className={cx('item')}>
                         <button className={cx('btn')} onClick={() => submitLogin()}>

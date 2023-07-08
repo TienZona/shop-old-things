@@ -8,6 +8,7 @@ import {
     faBagShopping,
     faClipboardList,
     faHeart,
+    faLocationDot,
     faRightFromBracket,
     faStar,
     faWallet,
@@ -15,7 +16,7 @@ import {
 import profileUser from '~/assets/icon/profile-user.png';
 import { useSelector } from 'react-redux';
 import { useCookies } from 'react-cookie';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
@@ -36,7 +37,7 @@ function UserNav() {
     return (
         <div className={cx('wrap')}>
             <div className={cx('user')} onClick={() => setOpen(true)}>
-                <img className={cx('avatar')} src={profileUser} alt="" />
+                <img className={cx('avatar')} src={cookies.user?.avatarUrl ?? profileUser} alt="" />
             </div>
             <Drawer closeIcon={null} extra={<UserHead />} placement="right" onClose={onClose} open={open}>
                 {cookies.user && (
@@ -79,16 +80,20 @@ function UserNav() {
                         </div>
                         <div className={cx('box')}>
                             <h1 className={cx('heading')}>Khác</h1>
-                            {cookies.user ? (
-                                <div className={cx('item')} onClick={() => logout()}>
-                                    <div className={cx('icon')} style={{ backgroundColor: '#2CD3E1' }}>
-                                        <FontAwesomeIcon icon={faRightFromBracket} />
+                            <Link to={`/account/address`}>
+                                <div className={cx('item')}>
+                                    <div className={cx('icon')} style={{ backgroundColor: '#FC2947' }}>
+                                        <FontAwesomeIcon icon={faLocationDot} />
                                     </div>
-                                    <span>Đăng xuất</span>
+                                    <span>Địa chỉ</span>
                                 </div>
-                            ) : (
-                                <div></div>
-                            )}
+                            </Link>
+                            <div className={cx('item')} onClick={() => logout()}>
+                                <div className={cx('icon')} style={{ backgroundColor: '#2CD3E1' }}>
+                                    <FontAwesomeIcon icon={faRightFromBracket} />
+                                </div>
+                                <span>Đăng xuất</span>
+                            </div>
                         </div>
                     </div>
                 )}

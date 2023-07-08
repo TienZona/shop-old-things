@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 const cx = classNames.bind(styles);
 
 function Search() {
-    const [inputValue, setInputValue] = useState(null);
+    const [inputValue, setInputValue] = useState('');
     const inputRef = useRef(null);
     const navigate = useNavigate();
 
